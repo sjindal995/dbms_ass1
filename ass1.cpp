@@ -18,11 +18,11 @@ int n_tables;
 vector<string> tables;
 map<string, vector<attr> > attributes;
 map<string, attr> p_key;
-map<string,vector<vector<string> > > records;
+map<string,map<string,vector<string> > > records;
 map<string,vector<int> > max_width;
 map<string,bool> valid;
 int n_rel;
-map<string,string> relations;		//key = foreign key, value = primary key(reference)
+map<string,string> relations;		//key = foreign table,key, value = primary table,key(reference)
 ifstream in_file;
 string dummy;
 // bool verifyType(string str,string type){
@@ -111,6 +111,12 @@ bool verifyType(string str, string type){
 	else return false;
 }
 
+string createKey(vector<string> vec){
+	string str = "";
+	for(auto ele: vec) str += ele+",";
+	return str;
+}
+
 void createTable(){
 		string cur_table;
 		in_file >> cur_table;
@@ -186,7 +192,8 @@ void createTable(){
 			}
 			cur_record.push_back(cur_a_val);
 			if(cur_a_val.length() > max_width[cur_table].at(n_attr-1)) max_width[cur_table].at(n_attr-1) = cur_a_val.length();
-			records[cur_table].push_back(cur_record);
+			if(p_key_val.size() > 0) records[cur_table][p_key_val.back()] = cur_record;
+			else records[cur_table][createKey(cur_record)] = cur_record;
 		}
 }
 
@@ -206,7 +213,7 @@ void outputDB(){
 			out_file << endl;
 			i=0;
 			for(auto cur_record: records[cur_table]){
-				for(auto attr_val: cur_record){
+				for(auto attr_val: cur_record.second){
 					out_file << setw(max_width[cur_table].at(i) + 5) << left << attr_val;
 					i++;
 				}
@@ -215,6 +222,25 @@ void outputDB(){
 			}
 		}
 		out_file << endl;
+	}
+}
+
+void checkRecords(){
+	for(auto relation: relations){
+		int d_pos = relation.first.find(',');
+		string foreign_table = relation.first.substr(0,d_pos);
+		string foreign_key = relation.first.substr(d_pos+1,relation.first.length()-d_pos-1);
+		d_pos = relation.second.find(',');
+		string primary_table = relation.second.substr(0,d_pos);
+		string primary_key = relation.second.substr(d_pos+1,relation.second.length()-d_pos-1);
+		int k_pos=0;
+		for(auto att: attributes[foreign_table]){
+			if(att.name == foreign_key) break;
+			k_pos++;
+		}
+		for(auto foreign_record: records[foreign_table]){
+			string f_val = foreign_record.second
+		}
 	}
 }
 
@@ -285,7 +311,7 @@ int main(int argc, char** argv){
 		cout << "Provide file name!" << endl;
 		exit(0);
 	}
-	
+	createDB(argv[1]);
 	// cout << "\t\t\tRELATIONS :" << endl;
 	// cout << "Table,foreign_key==>Table,primary_key"<<endl;
 	// for(auto relation: relations){
