@@ -1,0 +1,30 @@
+
+Q1 output
+Invalid
+T2
+1	abc
+2	abc
+3	abcd
+4	a
+T3
+1	rtu
+3	bhu
+3	nji
+
+Q2 input,
+2
+(T2,b1)
+(T3,c1)
+output-
+1	1
+2	1
+3	1
+4	1
+1	3
+2	3
+3	3
+4	3
+1	3
+2	3
+3	3
+4	3

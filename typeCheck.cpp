@@ -3,21 +3,27 @@
 #include <regex>
 
 using namespace std;
-
-string str_regex = "[a-zA-Z0-9]+";
-string int_regex = "[\\\\+\\\\-]{,1}[0-9]+";
-string bool_regex = "true|TRUE|FALSE|false";
-string real_regex = "((-)?[0-9]+)|((-)?[0-9]+(\\\\.)[0-9]+)";
-string date_regex = "(([0-9]{2})&&([^(00)]))/(([0-9]{2})&&([^(00)]))/(([0-9]{4})&&([^(0000)]))|(([0-9]{2})&&([^(00)]))";
-string time_regex = "[0-9]{2}:[0-9]{2}:[0-9]{2} [ap]m";
+using namespace regex_constants;
+std::regex str_regex ("[a-z]");
+// regex int_regex ("[+-]{,1}[0-9]+");
+// regex bool_regex ("true|TRUE|FALSE|false");
+// regex real_regex ("((-)?[0-9]+)|((-)?[0-9]+(.)[0-9]+)");
+// regex date_regex ("(([0-9]{2})&&([^(00)]))/(([0-9]{2})&&([^(00)]))/(([0-9]{4})&&([^(0000)]))|(([0-9]{2})&&([^(00)]))");
+// regex time_regex ("[0-9]{2}:[0-9]{2}:[0-9]{2} [ap]m");
 
 bool verifyType(string str,string type){
-	if(type == "str") return regex_match(str,regex(str_regex));
-	else if(type == "bool") return regex_match(str,regex(bool_regex));
-	else if(type == "int") return regex_match(str,regex(int_regex));
-	else if(type == "real") return regex_match(str, regex(real_regex));
-	else if(type == "date") return regex_match(str, regex(date_regex));
-	else if(type == "time") return regex_match(str,regex(time_regex));
+	if(type == "str"){
+		if(regex_match(str,(str_regex))) return true;
+		else{
+			cout << "regex not matched" << endl;
+			return false;
+		}
+	}
+	// else if(type == "bool") return regex_match(str,(bool_regex));
+	// else if(type == "int") return regex_match(str,(int_regex));
+	// else if(type == "real") return regex_match(str, (real_regex));
+	// else if(type == "date") return regex_match(str, (date_regex));
+	// else if(type == "time") return regex_match(str,(time_regex));
 	else return false;
 }
 
