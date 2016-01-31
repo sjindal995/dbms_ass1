@@ -1,0 +1,13 @@
+Department
+Dep_number     Dep_name        Budget     
+D1             Marketing       10000      
+D1             Development     1000       
+D3             Research        100        
+
+Employee
+Emp_no     Emp_name     Dep_no     Salary     
+E1         abc          D1         40000      
+E2         abc2         D1         50000      
+E3         abc3         D2         60000      
+E4         abc4         D2         30000      
+
