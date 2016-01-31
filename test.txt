@@ -1,0 +1,10 @@
+1
+Department
+3
+Dep_number,string,1
+Dep_name,string,0
+Budget,int,0
+3
+D1,Marketing,10000
+D1,Development,1000
+D3,Research,100
