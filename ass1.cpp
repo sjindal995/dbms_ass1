@@ -6,6 +6,7 @@
 #include <string.h>	
 #include <iomanip>
 #include <regex>
+#include <utility>
 using namespace std;
 
 struct attr{
@@ -22,7 +23,7 @@ map<string,map<string,vector<string> > > records;
 map<string,vector<int> > max_width;
 map<string,bool> valid;
 int n_rel;
-map<string,string> relations;		//key = foreign table,key, value = primary table,key(reference)
+vector<pair<string,string> > relations;		//key = foreign table,key, value = primary table,key(reference)
 ifstream in_file;
 string dummy;
 // bool verifyType(string str,string type){
@@ -184,12 +185,12 @@ void createTable(){
 				cout << cur_a_val <<"wrong type. Attribute type : " << attributes[cur_table].at(n_attr-1).type << endl;
 				// exit(0);
 				valid[cur_table] = false;
-				if((p_key[cur_table].name == attributes[cur_table].at(n_attr-1).name) && (find(p_key_val.begin(),p_key_val.end(),cur_a_val) != p_key_val.end())){
-					cout << "duplicate primary key in records" << endl;
-					valid[cur_table] = false;
-				}
-				else if(p_key[cur_table].name == attributes[cur_table].at(n_attr-1).name) p_key_val.push_back(cur_a_val);
 			}
+			if((p_key[cur_table].name == attributes[cur_table].at(n_attr-1).name) && (find(p_key_val.begin(),p_key_val.end(),cur_a_val) != p_key_val.end())){
+				cout << "duplicate primary key in records" << endl;
+				valid[cur_table] = false;
+			}
+			else if(p_key[cur_table].name == attributes[cur_table].at(n_attr-1).name) p_key_val.push_back(cur_a_val);
 			cur_record.push_back(cur_a_val);
 			if(cur_a_val.length() > max_width[cur_table].at(n_attr-1)) max_width[cur_table].at(n_attr-1) = cur_a_val.length();
 			if(p_key_val.size() > 0) records[cur_table][p_key_val.back()] = cur_record;
@@ -225,7 +226,7 @@ void outputDB(){
 	}
 }
 
-void checkRecords(){
+void checkRelationRecords(){
 	for(auto relation: relations){
 		int d_pos = relation.first.find(',');
 		string foreign_table = relation.first.substr(0,d_pos);
@@ -239,7 +240,12 @@ void checkRecords(){
 			k_pos++;
 		}
 		for(auto foreign_record: records[foreign_table]){
-			string f_val = foreign_record.second
+			string f_val = foreign_record.second.at(k_pos);
+			if(records[primary_table].find(f_val) == records[primary_table].end()){
+				cout << "foreign key " << foreign_key << " value : " << f_val << " not present in primary key "<<primary_key <<" records" <<endl;
+				valid[foreign_table] = false;
+				break;
+			}
 		}
 	}
 }
@@ -270,7 +276,10 @@ void createRelations(){
 		string table2 = foreign_key.substr(0,d_pos);
 		key = foreign_key.substr(d_pos+1,foreign_key.length()-d_pos-1);
 		bool key_p = false;
-		if(!valid[table1]) valid[table2] = false;
+		if(!valid[table1]){
+			cout << "table containing primary key for the foreign key invalid!" << endl;
+			valid[table2] = false;
+		}
 		for(auto att: attributes[table2]){
 			if(att.name == key){
 				key_p=true;
@@ -292,7 +301,7 @@ void createRelations(){
 			// continue;
 			valid_rel = false;
 		}
-		if(valid_rel) relations[primary_key] = foreign_key;
+		if(valid_rel) relations.push_back(make_pair(foreign_key,primary_key));
 	}
 }
 
@@ -303,6 +312,7 @@ void createDB(string file){
 		createTable();
 	}
 	createRelations();
+	checkRelationRecords();
 	outputDB();
 }
 

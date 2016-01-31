@@ -5,7 +5,7 @@ A1,INTEGER,1
 A2,STRING,0
 3
 1,x
-3,y
+2,y
 3,z
 T2
 2

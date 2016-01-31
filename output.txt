@@ -1,5 +1,8 @@
 T1
-Invalid
+A1     A2     
+1      x      
+2      y      
+3      z      
 
 T2
 b1     b2       
