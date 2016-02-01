@@ -1,19 +1,19 @@
-T1
-A1     A2     
-1      x      
-2      y      
-3      z      
+Passengers
+P_Id     FlightNumber     Name                 SpecialClass     
+1        364              HarveySpecter        TRUE             
+2        364              KoyalRana            FALSE            
+3        441              LeonardHofstader     FALSE            
+4        441              SheldonCooper        FALSE            
+5        364              MeganYoung           TRUE             
 
-T2
-b1     b2       
-1      abc      
-2      abc      
-3      abcd     
-4      a        
+Flights
+FlightNumber     Source      Destination      
+364              NewYork     SanFrancisco     
+441              SanJose     Seattle          
 
-T3
-c1     c2      
-1      rtu     
-3      bhu     
-3      nji     
+Schedule
+FlightNumber     Date           
+364              14/02/2016     
+364              15/02/2016     
+441              14/02/2016     
 

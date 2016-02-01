@@ -36,3 +36,25 @@ int main(){
 		cout << verifyType(s,type) << endl;;
 	}
 }
+
+// #include <iostream>
+// #include <algorithm>
+// #include <string>
+// #include <vector>
+
+// using namespace std;
+
+// int main(){
+// 	vector<string> cur_attr_vec {"abc","def","abc","abc"};
+// 	vector<string> sub_attr_vec {"abc","abc"};
+// 	sort(cur_attr_vec.begin(),cur_attr_vec.end());
+// 	sort(sub_attr_vec.begin(),sub_attr_vec.end());
+// 	vector<string> v3;
+// 	set_intersection(cur_attr_vec.begin(),cur_attr_vec.end(),sub_attr_vec.begin(),sub_attr_vec.end(),back_inserter(v3));
+// 	cout << "size: " << v3.size() <<endl;
+// 	for(string v: v3){
+// 		cout << v << " ";
+// 	}
+// 	cout << endl;
+
+// }

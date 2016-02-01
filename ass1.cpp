@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <regex>
 #include <utility>
+#include <algorithm>
 using namespace std;
 
 struct attr{
@@ -20,6 +21,7 @@ vector<string> tables;
 map<string, vector<attr> > attributes;
 map<string, attr> p_key;
 map<string,map<string,vector<string> > > records;
+map<string,int> n_tbl_records;
 map<string,vector<int> > max_width;
 map<string,bool> valid;
 int n_rel;
@@ -44,7 +46,7 @@ bool verifyString(string str){
 }
 
 bool verifyBool(string str){
-	if(str == "true" || str == "TRUE" || str == "false" || str == "FALSE") return true;
+	if(str == "true" || str == "TRUE" || str == "false" || str == "FALSE" || str == "0" || str == "1") return true;
 	return false;
 }
 
@@ -158,6 +160,7 @@ void createTable(){
 		}
 		int n_records;
 		in_file >> n_records;
+		n_tbl_records[cur_table] = n_records;
 		getline(in_file,dummy,'\n');
 		vector<string> p_key_val;
 		for(int j=0;j<n_records;j++){
@@ -166,7 +169,7 @@ void createTable(){
 			for(int k=0;k<n_attr-1;k++){
 				getline(in_file,cur_a_val,',');
 				if(!verifyType(cur_a_val,attributes[cur_table].at(k).type)){
-					cout << cur_a_val <<"wrong type. Attribute type : " << attributes[cur_table].at(k).type << endl;
+					cout << cur_a_val <<" wrong type. Attribute type : " << attributes[cur_table].at(k).type << endl;
 					// exit(0);
 					valid[cur_table] = false;
 				}
@@ -182,7 +185,7 @@ void createTable(){
 			}
 			getline(in_file,cur_a_val,'\n');
 			if(!verifyType(cur_a_val,attributes[cur_table].at(n_attr-1).type)){
-				cout << cur_a_val <<"wrong type. Attribute type : " << attributes[cur_table].at(n_attr-1).type << endl;
+				cout << cur_a_val <<" wrong type. Attribute type : " << attributes[cur_table].at(n_attr-1).type << endl;
 				// exit(0);
 				valid[cur_table] = false;
 			}
@@ -307,6 +310,10 @@ void createRelations(){
 
 void createDB(string file){
 	in_file.open(file);
+	if(!in_file.is_open()){
+		cout << "failed to open file: " << file << endl;
+		exit(0);
+	}
 	in_file >> n_tables;
 	for(int i=0;i<n_tables;i++){
 		createTable();
@@ -316,16 +323,208 @@ void createDB(string file){
 	outputDB();
 }
 
-int main(int argc, char** argv){
-	if(argc < 2){
-		cout << "Provide file name!" << endl;
+ifstream in_file2;
+int n_sub_attr;
+int n_sub_tables;
+map<string,map<string,vector<string> > > sub_tables;
+vector<vector<string> > sub_attr;
+vector<vector<vector<string> > > sub_records;
+vector<vector<string> > final_out;
+vector<string> acc_attr;
+vector<int> sub_width;
+ofstream out_file2;
+
+int findAttrPos(string table, string cur_attr){
+	int ans=0;
+	for(auto att: attributes[table]){
+		if(cur_attr == att.name) return ans;
+		ans++;
+	}
+	return -1;
+}
+
+vector<string> getAttrVals(string table,int attr_pos){
+	vector<string> vals;
+	for(auto record: records[table]) vals.push_back(record.second.at(attr_pos));
+	return vals;
+}
+
+void crossJoin(int index){
+	vector<vector<string> > v1 = sub_records.at(index);
+	vector<vector<string> > final;
+	for(int i=0;i<final_out.size();i++){
+		for(int j=0;j<v1.size();j++){
+			vector<string> cur_record = final_out.at(i);
+			cur_record.insert(cur_record.end(),v1.at(j).begin(),v1.at(j).end());
+			final.push_back(cur_record);
+		}
+	}
+	final_out = final;
+	acc_attr.insert(acc_attr.end(),sub_attr.at(index).begin(),sub_attr.at(index).end());
+}
+
+bool subRecEqual(vector<int> final_out_pos, vector<int> v1_pos, int index, int j_final_out, int k_v1){
+	vector<vector<string> > v1 = sub_records.at(index);
+	for(int i=0;i<final_out_pos.size();i++){
+		if(final_out.at(j_final_out).at(final_out_pos.at(i)) != v1.at(k_v1).at(v1_pos.at(i))) return false;
+	}
+	return true;
+}
+
+void naturalJoin(vector<string> intersection, int index){
+	vector<vector<string> > v1 = sub_records.at(index);
+	vector<vector<string> > final;
+	vector<int> final_out_pos;
+	vector<int> v1_pos;
+	for(int i=0;i<intersection.size();i++){
+		string j_string = intersection.at(i);
+		for(int j=0;j<acc_attr.size();j++){
+			if(acc_attr.at(j) == j_string){
+				final_out_pos.push_back(j);
+				break;
+			}
+		}
+		for(int j=0;j<sub_attr.at(index).size();j++){
+			if(sub_attr.at(index).at(j) == j_string){
+				v1_pos.push_back(j);
+				break;
+			}
+		}
+	}
+	sort(final_out_pos.begin(),final_out_pos.end());
+	sort(v1_pos.begin(),v1_pos.end());
+	for(int j=0;j<final_out.size();j++){
+		for(int k=0;k<v1.size();k++){
+			// if(final_out.at(j).at(final_out_pos) == v1.at(k).at(v1_pos)){
+			vector<string> final_rec;
+			if(subRecEqual(final_out_pos,v1_pos,index,j,k)){
+				final_rec = final_out.at(j);
+				final_rec.insert(final_rec.end(),v1.at(k).begin(),v1.at(k).end());
+				for(int a=v1_pos.size()-1;a>=0;a--){
+					final_rec.erase(final_rec.begin()+acc_attr.size() + v1_pos.at(a));
+				}
+			}
+			if(final_rec.size() > 0) final.push_back(final_rec);
+		}
+	}
+	final_out = final;
+	vector<string> new_attr = acc_attr;
+	new_attr.insert(new_attr.end(),sub_attr.at(index).begin(), sub_attr.at(index).end());
+	for(int a=v1_pos.size()-1;a>=0;a--){
+		new_attr.erase(new_attr.begin()+acc_attr.size() + v1_pos.at(a));
+	}
+	acc_attr = new_attr;
+}
+
+void joinSchema(){
+	final_out = sub_records.at(0);
+	acc_attr = sub_attr.at(0);
+	for(int i=1;i<sub_attr.size();i++){
+		vector<string> intersection;
+		vector<string> v1 = acc_attr;
+		vector<string> v2 = sub_attr.at(i);
+		set_intersection(v1.begin(),v1.end(),v2.begin(),v2.end(),back_inserter(intersection));
+		if(intersection.size() == 0) crossJoin(i);
+		else naturalJoin(intersection,i);
+	}
+}
+
+void setWidth(){
+	for(int i=0;i<acc_attr.size();i++){
+		sub_width.push_back(acc_attr.at(i).length());
+	}
+	for(int i=0;i<final_out.size();i++){
+		for(int j=0;j<final_out.at(i).size();j++){
+			if(final_out.at(i).at(j).length() > sub_width.at(j)) sub_width.at(j) = final_out.at(i).at(j).length();
+		}
+	}
+}
+
+void printSubSchema(){
+	setWidth();
+	out_file2.open("output2.txt");
+	for(int i=0;i<acc_attr.size();i++){
+		out_file2 << setw(sub_width.at(i)+10) << left << acc_attr.at(i);
+	}
+	out_file2 << endl;
+	for(int i=0;i<final_out.size();i++){
+		for(int j=0;j<final_out.at(i).size();j++){
+			out_file2 << setw(sub_width.at(j)+10) << left << final_out.at(i).at(j);
+		}
+		out_file2 << endl;
+	}
+}
+
+void input2(string file){
+	in_file2.open(file);
+	if(!in_file2.is_open()){
+		cout << "failed to open file: " << file << endl;
 		exit(0);
 	}
-	createDB(argv[1]);
-	// cout << "\t\t\tRELATIONS :" << endl;
-	// cout << "Table,foreign_key==>Table,primary_key"<<endl;
-	// for(auto relation: relations){
-	// 	cout << relation.first << "==>" << relation.second << endl;
-	// }
+	in_file2 >> n_sub_attr;
+	for(int i=0;i<n_sub_attr;i++){
+		string table;
+		string attr1;
+		getline(in_file2,table,'(');
+		getline(in_file2,table,',');
+		getline(in_file2,attr1,')');
+		if(valid[table] == false){
+			cout << "table " << table <<" is not valid." << endl;
+			continue;
+		}
+		int attr_pos = findAttrPos(table,attr1);
+		if(attr_pos == -1){
+			cout << "no attribute named " << attr1 << " in table "<<table << endl;
+			continue;
+		}
+		if(sub_tables.find(table) == sub_tables.end()) n_sub_tables++;
+		sub_tables[table][attr1] = getAttrVals(table,attr_pos);
+	}
+	for(auto table: sub_tables){
+		vector<string> tbl_attr;
+		for(auto cur_attr: table.second){
+			tbl_attr.push_back(cur_attr.first);
+		}
+		sub_attr.push_back(tbl_attr);
+	}
+	for(auto table: sub_tables){
+		vector<vector<string> > tbl_records;
+		for(int i=0;i<n_tbl_records[table.first];i++){
+			vector<string> cur_record;
+			for(auto cur_attr: table.second){
+				cur_record.push_back(cur_attr.second.at(i));
+			}
+			tbl_records.push_back(cur_record);
+		}
+		sub_records.push_back(tbl_records);
+	}
+	joinSchema();
+}
+
+
+int main(int argc, char** argv){
+	if(argc < 2){
+		cout << "Provide question code!" << endl;
+		exit(0);
+	}
+	if(string(argv[1]) == "1"){
+		if(argc < 3){
+			cout << "Provide file name for ques1." << endl;
+			exit(0);
+		}
+		createDB(argv[2]);
+	}
+	else if(string(argv[1]) == "2"){
+		if(argc < 4){
+			cout << "Provide file names for part 1 and 2" << endl;
+			exit(0);
+		}
+		createDB(argv[2]);
+		input2(argv[3]);
+		printSubSchema();
+	}
+	else{
+		cout << "Provide valid question code! : " << argv[1]<<endl;
+	}
 	return 0;
 }

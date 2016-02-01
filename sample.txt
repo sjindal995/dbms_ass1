@@ -18,11 +18,11 @@ b2,STRING,0
 4,a
 T3
 2
-c1,INTEGER,0
+b1,INTEGER,0
 c2,STRING,0
 3
 1,rtu
 3,bhu
 3,nji
 1
-((T2,b1),(T3,c1))
+((T2,b1),(T3,b1))
