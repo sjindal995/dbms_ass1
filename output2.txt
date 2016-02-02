@@ -1,9 +1,6 @@
-Destination           FlightNumber          Source           Name                      P_Id          Date                
-SanFrancisco          364                   NewYork          HarveySpecter             1             14/02/2016          
-SanFrancisco          364                   NewYork          HarveySpecter             1             15/02/2016          
-SanFrancisco          364                   NewYork          KoyalRana                 2             14/02/2016          
-SanFrancisco          364                   NewYork          KoyalRana                 2             15/02/2016          
-SanFrancisco          364                   NewYork          MeganYoung                5             14/02/2016          
-SanFrancisco          364                   NewYork          MeganYoung                5             15/02/2016          
-Seattle               441                   SanJose          LeonardHofstader          3             14/02/2016          
-Seattle               441                   SanJose          SheldonCooper             4             14/02/2016          
+Destination           FlightNumber          Name                      
+SanFrancisco          364                   HarveySpecter             
+SanFrancisco          364                   KoyalRana                 
+SanFrancisco          364                   MeganYoung                
+Seattle               441                   LeonardHofstader          
+Seattle               441                   SheldonCooper             

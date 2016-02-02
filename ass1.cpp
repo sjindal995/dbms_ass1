@@ -279,10 +279,10 @@ void createRelations(){
 		string table2 = foreign_key.substr(0,d_pos);
 		key = foreign_key.substr(d_pos+1,foreign_key.length()-d_pos-1);
 		bool key_p = false;
-		if(!valid[table1]){
-			cout << "table containing primary key for the foreign key invalid!" << endl;
-			valid[table2] = false;
-		}
+		// if(!valid[table1]){
+		// 	cout << "table containing primary key for the foreign key invalid!" << endl;
+		// 	valid[table2] = false;
+		// }
 		for(auto att: attributes[table2]){
 			if(att.name == key){
 				key_p=true;
@@ -305,6 +305,7 @@ void createRelations(){
 			valid_rel = false;
 		}
 		if(valid_rel) relations.push_back(make_pair(foreign_key,primary_key));
+		else valid[table2] = false;
 	}
 }
 

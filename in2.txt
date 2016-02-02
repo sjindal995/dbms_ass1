@@ -1,9 +1,5 @@
-8
+4
+(Passengers,Name)
 (Passengers,FlightNumber)
 (Flights,FlightNumber)
-(Schedule,FlightNumber)
-(Passengers,P_Id)
-(Passengers,Name)
-(Flights,Source)
 (Flights,Destination)
-(Schedule,Date)
